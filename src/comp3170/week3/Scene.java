@@ -8,8 +8,10 @@ import static org.lwjgl.opengl.GL15.GL_ELEMENT_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL11.glDrawElements;
 import static org.lwjgl.opengl.GL11.glPolygonMode;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
+import static comp3170.Math.*;
 
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -28,6 +30,9 @@ public class Scene {
 	private int indexBuffer;
 	private Vector3f[] colours;
 	private int colourBuffer;
+	
+	private Matrix4f modelMatrix = new Matrix4f();
+	
 
 	private Shader shader;
 
@@ -77,7 +82,32 @@ public class Scene {
 			// @formatter:on
 
 		indexBuffer = GLBuffers.createIndexBuffer(indices);
+		//modelMatrix = translationMatrix(0.5f, 0.5f, modelMatrix);
+		//modelMatrix = rotationMatrix(TAU/8, modelMatrix);
+		//modelMatrix = scaleMatrix(0.2f, 0.1f, modelMatrix);
 
+		//Answers to questions 2
+		
+		//answer to question 2a
+		// nothing as the code needs not be changed here.
+		//answer to question 2b
+		modelMatrix = identityMatrix(modelMatrix);
+		modelMatrix = rotationMatrix(-TAU/4, modelMatrix);
+		
+		//answer to question 2c
+		modelMatrix = identityMatrix(modelMatrix);
+		modelMatrix = scaleMatrix(0.5f, 0.5f, modelMatrix);
+		modelMatrix = translationMatrix(0.5f, -0.5f, modelMatrix);
+		//answer to question 2d'
+		modelMatrix = identityMatrix(modelMatrix);
+		modelMatrix = rotationMatrix(TAU/8, modelMatrix);
+		modelMatrix = scaleMatrix(0.5f, 0.5f, modelMatrix);
+		modelMatrix = translationMatrix(-0.65f, 0.65f, modelMatrix);
+		
+		
+
+		
+		
 	}
 
 	public void draw() {
@@ -86,7 +116,7 @@ public class Scene {
 		// set the attributes
 		shader.setAttribute("a_position", vertexBuffer);
 		shader.setAttribute("a_colour", colourBuffer);
-
+		shader.setUniform("u_modelMatrix", modelMatrix);
 		// draw using index buffer
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 		
@@ -105,10 +135,17 @@ public class Scene {
 	 * @return
 	 */
 
-	public static Matrix4f translationMatrix(float tx, float ty, Matrix4f dest) {
+	public static Matrix4f identityMatrix(Matrix4f dest) {
 		// clear the matrix to the identity matrix
 		dest.identity();
+		return dest;
 
+	}
+	
+	public static Matrix4f translationMatrix(float tx, float ty, Matrix4f dest) {
+		System.out.println("Translation in Progress");
+
+		System.out.println(dest);
 		//     [ 1 0 0 tx ]
 		// T = [ 0 1 0 ty ]
 	    //     [ 0 0 0 0  ]
@@ -119,6 +156,7 @@ public class Scene {
 		
 		dest.m30(tx);
 		dest.m31(ty);
+		System.out.println(dest);
 
 		return dest;
 	}
@@ -133,16 +171,36 @@ public class Scene {
 	 */
 
 	public static Matrix4f rotationMatrix(float angle, Matrix4f dest) {
-
+		System.out.println("Rotation in Progress");
+		System.out.println(dest);
 		// TODO: Your code here
 		//		[ cos(angle) -sin(angle) 0 0 ]
 		//	T =	[ sin(angle)  cos(angle) 0 0 ]
 		//		[ 0			 0			 0 0 ]
 		//		[ 0			 0			 0 1 ]
-		dest.m00((float) Math.cos(angle));
-		dest.m01((float) Math.sin(angle));
-		dest.m10((float) -Math.sin(angle));
-		dest.m11((float) Math.cos(angle));
+		float magA = (float) Math.sqrt(dest.m00()*dest.m00() + dest.m01()*dest.m01());
+		
+		System.out.println("MagnitudeA = "+magA+";");
+		float magB = (float) Math.sqrt(dest.m10()*dest.m10() + dest.m11()*dest.m11());
+		System.out.println("MagnitudeB = "+magB+";");
+
+		float currentAngle;
+		
+		if (dest.m00()==0) {
+			if(dest.m01()==0) {
+				currentAngle = 0;
+			}else {
+				currentAngle=1;				
+			}
+		}else {
+			currentAngle = (float)Math.atan(dest.m01()/dest.m00());
+		}
+		
+		dest.m00((float) Math.cos(angle)*magA);
+		dest.m01((float) Math.sin(angle)*magA);
+		dest.m10((float) -Math.sin(angle)*magB);
+		dest.m11((float) Math.cos(angle)*magB);
+		System.out.println(dest);
 
 		return dest;
 	}
@@ -158,6 +216,9 @@ public class Scene {
 	 */
 
 	public static Matrix4f scaleMatrix(float sx, float sy, Matrix4f dest) {
+		System.out.println("Scaling in Progress");
+
+		System.out.println(dest);
 
 		// TODO: Your code here
 		//		[ sx 0  0 0 ]
@@ -165,9 +226,13 @@ public class Scene {
 		//		[ 0	 0  0 0 ]
 		//		[ 0  0  0 1 ]
 		
-		dest.m00(sx);
-		dest.m11(sy);
+		dest.m00(sx*dest.m00());
+		dest.m10(sx*dest.m10());
+		dest.m01(sy*dest.m01());
+		dest.m11(sy*dest.m11());
+
 		
+		System.out.println(dest);
 
 		return dest;
 	}
