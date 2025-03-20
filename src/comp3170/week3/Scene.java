@@ -33,6 +33,11 @@ public class Scene {
 	
 	private Matrix4f modelMatrix = new Matrix4f();
 	
+	private Vector3f offset = new Vector3f(0.85f, 0.0f, 0.0f);
+	private float speed = 9f;
+	private float scaleRate = 0.1f;
+	private float rotationRate = TAU/6;
+	
 
 	private Shader shader;
 
@@ -103,7 +108,8 @@ public class Scene {
 		modelMatrix = rotationMatrix(TAU/8, modelMatrix);
 		modelMatrix = scaleMatrix(0.5f, 0.5f, modelMatrix);
 		modelMatrix = translationMatrix(-0.65f, 0.65f, modelMatrix);
-		
+		modelMatrix = identityMatrix(modelMatrix);
+		modelMatrix.translate(offset).scale(scaleRate);
 		
 
 		
@@ -122,7 +128,7 @@ public class Scene {
 		
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_INT, 0);
-
+		
 	}
 
 	/**
@@ -235,6 +241,15 @@ public class Scene {
 		System.out.println(dest);
 
 		return dest;
+	}
+
+	public void update(float deltaTime) {
+		// TODO Auto-generated method stub
+		float movement = speed*deltaTime;
+		float spin = rotationRate*deltaTime;
+		float growth = scaleRate*deltaTime;
+		modelMatrix.translate(0.0f, movement, 0.0f).rotateZ(spin);
+		System.out.println("Scene Updated");
 	}
 
 }
