@@ -11,7 +11,6 @@ import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static comp3170.Math.*;
 
 import org.joml.Matrix4f;
-import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
